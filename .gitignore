@@ -1,0 +1,6 @@
+*.db
+*.zip
+*.rar
+*.sql
+__pycache__/
+.env
