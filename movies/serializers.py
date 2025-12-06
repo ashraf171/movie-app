@@ -44,22 +44,31 @@ class MovieSerializer(serializers.ModelSerializer):
        return movie
 
 
-def update(self, instance, validated_data):
+    def update(self, instance, validated_data):
     # خذ IDs من الـ request
-    genres_ids = self.context['request'].data.get('genres_id', None)
-    actors_ids = self.context['request'].data.get('actors_id', None)
+        genres_ids = self.context['request'].data.get('genres_id', None)
+        actors_ids = self.context['request'].data.get('actors_id', None)
 
-    # عدّل القيم الأساسية
-    for attr, value in validated_data.items():
-        setattr(instance, attr, value)
-    instance.save()
+    
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        instance.save()
 
-    # لو المستخدم أرسل genres_id → حدّث العلاقة
-    if genres_ids is not None:
-        instance.genres.set(genres_ids)
+    
+        if genres_ids is not None:
+            instance.genres.set(genres_ids)
 
-    # لو أرسل actors_id → حدّث العلاقة
-    if actors_ids is not None:
-        instance.actors.set(actors_ids)
+    
+        if actors_ids is not None:
+            instance.actors.set(actors_ids)
 
-    return instance
+        return instance
+
+
+
+
+class ReviewSerializer(serializers.ModelSerializer):
+    class Meta:
+        model=Review
+        fields=['id','user','movie','rating','comment','created_at']
+        read_only_fields=['created_at']
