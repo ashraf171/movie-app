@@ -14,7 +14,7 @@ class Genre(models.Model):
 class Actor(models.Model):
     name=models.CharField(max_length=120,db_index=True)
     birth_year=models.IntegerField(
-        validators=[MinValueValidator(1990),MaxValueValidator(2025)]
+        validators=[MinValueValidator(1900),MaxValueValidator(2025)]
     )
     country=models.CharField(max_length=120)
 

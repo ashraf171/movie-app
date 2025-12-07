@@ -1,5 +1,5 @@
 from rest_framework.routers import DefaultRouter
-from .views import GenreViewSet,ActorViewSet,MovieViewSet,ReviewViewSet
+from .views import GenreViewSet,ActorViewSet,MovieViewSet,ReviewViewSet,RigesterViewSet
 from rest_framework_simplejwt.views import (
     TokenObtainPairView,
     TokenRefreshView,
@@ -14,7 +14,7 @@ router.register(r'reviews',ReviewViewSet)
 
 
 urlpatterns = [
-
+    path('register/', RigesterViewSet.as_view(), name='register'),
     path('token/',TokenObtainPairView.as_view(),name='token_obtain_pair'),
     path('token/refresh/',TokenRefreshView.as_view(),name='token-refresh'),
     

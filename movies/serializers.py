@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from .models import Genre,Actor,Movie,Review
-
+from django.contrib.auth.models import User
 class GenreSerializer(serializers.ModelSerializer):
     class Meta:
         model=Genre
@@ -16,28 +16,28 @@ class ActorSerializer(serializers.ModelSerializer):
 class MovieSerializer(serializers.ModelSerializer):
     genres=GenreSerializer(read_only=True,many=True)
     actors=ActorSerializer(read_only=True,many=True)
-    genres_id=serializers.PrimaryKeyRelatedField(
+    genres_ids=serializers.PrimaryKeyRelatedField(
         queryset=Genre.objects.all(),
         write_only=True,many=True
     )
-    actors_id=serializers.PrimaryKeyRelatedField(
+    actors_ids=serializers.PrimaryKeyRelatedField(
         queryset=Actor.objects.all(),
         write_only=True,many=True
     )
     class Meta:
         model=Movie
-        fields=['id','title','description','release_year','rating','genres','actors','created_at','updated_at','genres_id','actors_id']
+        fields=['id','title','description','release_year','rating','genres','actors','created_at','updated_at','genres_ids','actors_ids']
         read_only_fields=['created_at','updated_at']
 
     def create(self, validated_data):
-    # خذ IDs من الـ request
-       genres_ids = self.context['request'].data.get('genres_id', [])
-       actors_ids = self.context['request'].data.get('actors_id', [])
+    
+       genres_ids = validated_data.pop('genres_ids')
+       actors_ids = validated_data.pop('actors_ids')
 
-    # أنشئ الفيلم بدون العلاقات
+    
        movie = Movie.objects.create(**validated_data)
 
-    # أضف العلاقات Many-to-Many
+    
        movie.genres.set(genres_ids)
        movie.actors.set(actors_ids)
 
@@ -45,9 +45,9 @@ class MovieSerializer(serializers.ModelSerializer):
 
 
     def update(self, instance, validated_data):
-    # خذ IDs من الـ request
-        genres_ids = self.context['request'].data.get('genres_id', None)
-        actors_ids = self.context['request'].data.get('actors_id', None)
+    
+        genres_ids = validated_data.pop('genres_id',None)
+        actors_ids = validated_data.pop('actors_id',None)
 
     
         for attr, value in validated_data.items():
@@ -72,3 +72,27 @@ class ReviewSerializer(serializers.ModelSerializer):
         model=Review
         fields=['id','user','movie','rating','comment','created_at']
         read_only_fields=['created_at']
+
+
+
+from django.contrib.auth.models import User
+from rest_framework import serializers
+
+class RigesterSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['username', 'email', 'password']
+
+    def validate_email(self, value):
+        if User.objects.filter(email=value).exists():
+            raise serializers.ValidationError("this email allready used !")
+        return value
+
+    def create(self, validated_data):
+        user = User(
+            username=validated_data['username'],
+            email=validated_data['email']
+        )
+        user.set_password(validated_data['password'])
+        user.save()
+        return user
